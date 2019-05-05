@@ -1,0 +1,139 @@
+syntax = "proto3";
+package gameProto;
+//用户信息
+message UserData {
+    string uid = 1;
+    string name = 2;
+    string avatar = 3;
+    string opt = 4;
+}
+
+message RoomData {
+    string roomID = 1;
+    string gameID = 2;
+    string channelID = 3;
+    string kv = 4;
+}
+
+//玩家信息
+message Player {
+    string id = 1;
+    UserData user = 2; //用户信息
+}
+
+//请求
+message Msg {
+    MsgID ID = 1;
+}
+
+enum MsgID {
+    None = 0;
+    Ping = 1;
+    Pong = 2;
+    SendError = 3; //服务器 告知 客户端 发送消息错误
+    RecvError = 4; //客户端 告知 服务器 接收消息错误
+    Reconnect = 5; //客户端 告知 服务器 进行重连
+    JoinFail = 6; //服务器 告知 客户端 加入房间失败
+    Timestamp = 7; //客户端 告知 客户端 服务器时间
+    Check = 8; //检查 信息完整性
+
+    //行为消息 会断线重发的
+    Join = 9; //客户端 告知 服务器 加入游戏
+    JoinResp = 17; //服务器 告知 客户端 登录成功
+    Rejoin = 19; //客户端 告知 服务器 请求重新加入游戏
+
+    Create = 10; //服务器 告知 客户端 游戏创建了
+    Ready = 11; //客户端 告知 服务器 准备好了
+    Start = 12; //服务器 告知 客户端 游戏开始了
+    Custom = 13; //客户端 告知 服务器 一次操作
+    Result = 15; //客户端 告知 服务器 请求结算
+    End = 16; //服务器 告知 客户端 游戏结束
+    Error = 18;
+}
+
+//检查消息 是否需要补发
+message MsgCheck {
+    MsgID ID = 1;
+    int32 sendIndex = 2; //发送序号
+    int32 recvIndex = 3; //接收序号
+}
+
+//Join 加入游戏
+message MsgJoin {
+    MsgID ID = 1;
+    UserData userData = 2; // 个人信息
+    RoomData roomData = 3; // 房间信息
+}
+
+//Join 加入游戏成功的回调
+message MsgJoinResp {
+    MsgID ID = 1;
+    string joinID = 2; //登录ID
+}
+
+message MsgRejoin {
+    MsgID ID = 1;
+    string joinID = 2; //登录ID
+}
+
+message MsgCreate {
+    MsgID ID = 1;
+    int32 index = 2;
+    int32 seed = 3; //随机种子
+    repeated Player playerArray = 4; //玩家列表
+    int32 timestamp = 5;
+}
+
+message MsgReady {
+    MsgID ID = 1;
+    int32 index = 2;
+}
+
+message MsgStart {
+    MsgID ID = 1;
+    int32 index = 2;
+    int32 timestamp = 3;
+}
+
+message MsgCustom {
+    MsgID ID = 1;
+    int32 index = 2;
+    string data = 3;
+}
+
+message MsgResult {
+    MsgID ID = 1;
+    int32 index = 2;
+    int32 type = 3; //win:1,lose:2;draw:3
+}
+
+message MsgEnd {
+    MsgID ID = 1;
+    int32 index = 2;
+    int32 type = 3; //win:1,lose:2;draw:3
+    string nonstr = 4;
+    string sign = 5;
+    string resultrawdata = 6;
+    string timestamp = 7;
+}
+
+message MsgSendError {
+    MsgID ID = 1;
+    int32 from = 2; //起始序号
+}
+
+message MsgRecvError {
+    MsgID ID = 1;
+    int32 from = 2; //起始序号
+}
+
+message MsgTimestamp {
+    MsgID ID = 1;
+    int32 timestamp = 2;
+}
+
+message MsgError {
+    MsgID ID = 1;
+    int32 code = 2;
+    string msg = 3;
+}
